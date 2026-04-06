@@ -1,6 +1,5 @@
 pandas
 datetime
-io
 json
 qrqode
 PIL
