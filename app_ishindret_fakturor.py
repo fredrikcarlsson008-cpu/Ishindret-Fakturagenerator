@@ -26,6 +26,7 @@ base_path = Path(__file__).resolve().parent
 
 # Skapar en fullständig sökväg till filen
 file_path_image = base_path / "Ishindret.png"
+file_path_qr = base_path / f"{fastighet}" "_qr.png"
 
 # Formattering
 MarginLeft = 20
@@ -245,10 +246,10 @@ if len(extraherad_data) > 0:
 
                 # Generera QR-koden
                 qr = qrcode.make(epc_string)
-                qr.save(base_path + "/faktura_" + f"{Fastighet}" + "_qr.png")
+                qr.save(file_path_qr)
 
-                pdf.drawImage(base_path + "/faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
-                os.remove(base_path + "/faktura_" + f"{Fastighet}" + "_qr.png")
+                pdf.drawImage(file_path_qr", Indent6 - 7, 120, width=140, height=140)
+                os.remove(fiel_path_qr")
 
                 pdf.showPage()
 
