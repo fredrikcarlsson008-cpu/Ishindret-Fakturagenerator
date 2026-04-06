@@ -1,6 +1,6 @@
 pandas
 datetime
-qrqode[pil]
+qrcode
 PIL
 os
 streamlit
