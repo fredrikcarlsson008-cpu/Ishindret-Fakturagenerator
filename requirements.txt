@@ -6,3 +6,4 @@ json
 qrqode
 PIL
 os
+streamlit
