@@ -248,7 +248,7 @@ if len(extraherad_data) > 0:
                 qr = qrcode.make(epc_string)
                 qr.save(file_path_qr)
 
-                pdf.drawImage(file_path_qr", Indent6 - 7, 120, width=140, height=140)
+                pdf.drawImage(file_path_qr, Indent6 - 7, 120, width=140, height=140)
                 os.remove(fiel_path_qr")
 
                 pdf.showPage()
