@@ -26,7 +26,6 @@ base_path = Path(__file__).resolve().parent
 
 # Skapar en fullständig sökväg till filen
 file_path_image = base_path / "Ishindret.png"
-file_path_qr = base_path / f"{fastighet}" "_qr.png"
 
 # Formattering
 MarginLeft = 20
@@ -245,6 +244,8 @@ if len(extraherad_data) > 0:
                 epc_string = json.dumps(epc_data, ensure_ascii=False)
 
                 # Generera QR-koden
+                file_path_qr = base_path / f"{Fastighet}" "_qr.png"
+            
                 qr = qrcode.make(epc_string)
                 qr.save(file_path_qr)
 
