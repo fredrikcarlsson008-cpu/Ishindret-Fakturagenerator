@@ -1,0 +1,258 @@
+# Skapar fakturor för Samfälligheten Ishindret
+
+import streamlit as st
+import pandas as pd
+import datetime
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+import json
+import qrcode
+from PIL import Image
+import os
+
+title = 'Samfälligheten Ishindret'
+subTitle = 'Faktura'
+Bankgiro = "806-2432"
+Postadress = "583 36 Linköping"
+documentTitle = "Faktura"
+
+extraherad_data = ""
+
+# Formattering
+MarginLeft = 20
+Indent1 = 60
+Indent2 = 100
+Indent3 = 200
+Indent4 = 300
+Indent5 = 360
+Indent6 = 400
+FullWidth = 520
+BeskrivningYPos = 340
+
+st.title("Samfälligheten Ishindrets fakturagenerator")
+st.markdown(
+    """
+    Mata in de efterfrågade uppgifterna, ladda upp medlemsregistret och tryck på generera fakturor så skapas fakturorna som PDFer och läggs i mapp X
+    """
+)
+
+today = datetime.date.today()
+next_month = today + datetime.timedelta(days=30)
+this_year = datetime.date.today().year
+
+st.subheader("Kassörinformation")
+KassorNamn = st.text_input("Ange kassörens namn:")
+KassorTel = st.text_input("Ange kassörens telefonnummer:")
+KassorEpost = st.text_input("Ange kassörens epost adress:")
+'Kassör', KassorNamn
+'Telefon', KassorTel
+'Epost', KassorEpost
+
+Year = st.text_input("Vilket år gäller fakturorna för?",value=this_year)
+'Valt år är:', Year
+
+Belopp = st.number_input("Vad är årets avgift?", min_value=0, value=None)
+'Avgiften för året är:', Belopp
+
+Datum = st.date_input("Fakturadatum",format="YYYY/MM/DD")
+'Valt fakturadatum är: ', Datum
+
+
+BetalDatum = st.date_input("Sista betalningsdatum",value=next_month,format="YYYY/MM/DD")
+'Valt sista betalningsdatum är: ', BetalDatum
+
+uploaded_file = st.file_uploader("Choose a file",type="xlsx")
+if uploaded_file is not None:
+    df = pd.read_excel(uploaded_file, header=1)
+
+    # Eftersom det finns två kolumner som heter 'Namn', kommer pandas 
+    # automatiskt döpa dem till 'Namn' och 'Namn.1'.
+    # Vi väljer ut de relevanta kolumnerna:
+    extraherad_data = df[['Fastighet', 'Adress', 'Namn', 'Namn.1']]
+    extraherad_data.fillna("", inplace=True)
+    
+'Inläst:', f"{len(extraherad_data)}" ' poster'
+
+# Streamlit UI
+
+if len(extraherad_data) > 0:
+    if st.button("Generera fakturor"):
+        buffer = BytesIO()
+        # Skapar pdf med qr-kod
+
+        pdf = canvas.Canvas(buffer, pagesize=A4)
+        
+        # loopa igenom alla fastigheter
+        for i in range(0,len(extraherad_data)):
+                Fastighet = ""
+                Namn = ""
+                Adress = ""
+                Fastighet = extraherad_data["Fastighet"][i]
+                Namn = extraherad_data["Namn"][i]
+                Adress = extraherad_data["Adress"][i]
+                if len(extraherad_data["Namn.1"][i]) > 0:
+                        Namn = Namn + " & " + extraherad_data["Namn.1"][i]
+
+                Betalningsinfo = [
+                    "Datum: " f"{Datum}",
+                    "Fakturanummer: " f"{Fastighet}",
+                    "Förfallodag: " f"{BetalDatum}"
+                ]
+
+                Fakturamottagare = [
+                    f"{Namn}",
+                    f"{Adress}",
+                    f"{Postadress}"
+                ]
+
+                # Generera titel och bild
+                pdf.setTitle(documentTitle)
+
+                pdf.setFillColorRGB(0.25,0,0.6)
+                pdf.rect(MarginLeft, 800, FullWidth, 16, stroke = 0, fill = 1)
+                pdf.setFillColorRGB(0.9,0.9,0.9)
+                pdf.rect(MarginLeft, 600, FullWidth, 200, stroke = 0, fill = 1)
+
+                pdf.setFont("Helvetica", 20)
+                pdf.setFillColor(colors.black)
+                pdf.drawString(40, 775, title)
+                pdf.drawString(360, 775, subTitle)
+
+                pdf.drawImage("/Users/Fredrik/Documents/Python/Ishindret/Ishindret.png", 40, 630, width=250, height=130)
+
+
+                # Generera Fakturainformation
+                Fakturatext = pdf.beginText(360, 730)
+                Fakturatext.setFont("Helvetica-Bold", 10)
+                Fakturatext.setFillColor(colors.darkblue)
+                pdf.setStrokeColorRGB(0.6,0.6,0.6)
+                i = 0
+                for line in Betalningsinfo:
+                    Fakturatext.textLine(line)
+                    Fakturatext.textLine("")
+                    pdf.line(360, 726-i, 500, 726-i)
+                    i = i+24
+
+                pdf.drawText(Fakturatext)
+
+
+                # Generera Fakturamottagare
+                Mottagare = pdf.beginText(MarginLeft, 540)
+                Mottagare.setFont("Helvetica-Bold", 12)
+                Mottagare.setFillColor(colors.black)
+                Mottagare.textLine("Fakturamottagare")
+                Mottagare.textLine("")
+                pdf.line(MarginLeft, 530, 260, 530)
+                Mottagare.setFont("Helvetica", 12)
+                for line in Fakturamottagare:
+                    Mottagare.textLine(line)
+
+                pdf.drawText(Mottagare)
+
+                # Generera Meddelande
+                Meddelande = pdf.beginText(Indent4, 540)
+                Meddelande.setFont("Helvetica-Bold", 12)
+                Meddelande.setFillColor(colors.black)
+                Meddelande.textLine("Meddelande")
+                Meddelande.textLine("")
+                pdf.line(Indent4, 530, FullWidth - MarginLeft, 530)
+                Meddelande.setFont("Helvetica", 12)
+                Meddelande.textLine("Skanna QR-koden, all information")
+                Meddelande.textLine("ska fyllas i automatiskt.")
+                Meddelande.textLine("Om det inte fungerar fyll i manuellt och")
+                Meddelande.textLine("ange fastighetsbeteckningen i meddelande.")
+
+                pdf.drawText(Meddelande)
+
+                # Generera beskrivning
+                pdf.rect(MarginLeft, BeskrivningYPos, FullWidth, 3, stroke = 0, fill = 1)
+                pdf.line(MarginLeft,BeskrivningYPos -24, FullWidth + MarginLeft, BeskrivningYPos -24)
+                pdf.line(MarginLeft,BeskrivningYPos -48, FullWidth + MarginLeft, BeskrivningYPos -48)
+                Beskrivning = pdf.beginText(MarginLeft, BeskrivningYPos - 15)
+                Beskrivning.setFont("Helvetica", 10)
+                Beskrivning.textLine("Beskrivning")
+                Beskrivning.textLine("")
+                Beskrivning.textLine("Årsavgift samfälligheten Ishindret " + Year)
+
+                pdf.drawText(Beskrivning)
+
+                Kostnad= pdf.beginText(Indent6, BeskrivningYPos -15)
+                Kostnad.setFont("Helvetica", 10)
+                Kostnad.textLine("Belopp")
+                Kostnad.textLine("")
+                Kostnad.textLine(f"{Belopp}" + " kr")
+
+                pdf.drawText(Kostnad)
+
+                # Generera Ishindret info
+                Ishindret = pdf.beginText(MarginLeft, 60)
+                Ishindret.setFont("Helvetica", 10)
+                Ishindret.textLine(f"{title}")
+                Ishindret.textLine("Org. nr.: 717913-2092")
+
+                pdf.drawText(Ishindret)
+
+                # Generera kontaktinfo
+                Kontakt = pdf.beginText(Indent3, 60)
+                Kontakt.setFont("Helvetica", 10)
+                Kontakt.textLine("Kontaktuppgifter Kassör")
+                Kontakt.textLine(f"{KassorNamn}")
+                Kontakt.textLine("Telefon: " f"{KassorTel}")
+                Kontakt.textLine("Epost: " f"{KassorEpost}")
+
+                pdf.drawText(Kontakt)
+
+                # Generera Betalningsuppgifter
+                Betalningsuppgifter = pdf.beginText(Indent6, 60)
+                Betalningsuppgifter.setFont("Helvetica", 10)
+                Betalningsuppgifter.textLine("Betalningsuppgifter")
+                Betalningsuppgifter.textLine("Swedbank")
+                Betalningsuppgifter.textLine("Bankgiro: 806-2432")
+
+                pdf.drawText(Betalningsuppgifter)
+
+
+                # Draw image at (x,y) = (100, 500) with specific dimensions
+                # pdf.drawImage("Ishindret 14 faktura_qr.png", 400, 120, width=140, height=140)
+
+                # Formatera enligt EPC-standarden (SCT)
+                # Varje del separeras av en radbrytning \n
+                epc_data = (
+                {
+                "uqr": 1,
+                "tp": 1,
+                "nme": f"{title}",
+                "cid": f"{Fastighet}",
+                "iref": f"{Fastighet}",
+                "idt": f"{Datum}",
+                "ddt": f"{BetalDatum}",
+                "due": Belopp,
+                "pt": "BG",
+                "acc": f"{Bankgiro}"
+                }
+                )
+
+                epc_string = json.dumps(epc_data, ensure_ascii=False)
+
+                # Generera QR-koden
+                qr = qrcode.make(epc_string)
+                qr.save("/Users/Fredrik/Documents/Python/Ishindret/faktura_" + f"{Fastighet}" + "_qr.png")
+
+                pdf.drawImage("/Users/Fredrik/Documents/Python/Ishindret/faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
+                os.remove("/Users/Fredrik/Documents/Python/Ishindret/faktura_" + f"{Fastighet}" + "_qr.png")
+
+                pdf.showPage()
+
+        pdf.save()
+        buffer.seek(0)
+            
+        # 4. Använd st.download_button för nedladdning
+        st.download_button(
+                label="Ladda ner PDF",
+                data=buffer,
+                file_name="Fakturor Ishindret.pdf",
+                mime="application/pdf"
+            )
+            
