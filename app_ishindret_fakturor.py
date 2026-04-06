@@ -25,7 +25,7 @@ extraherad_data = ""
 base_path = Path(__file__).resolve().parent
 
 # Skapar en fullständig sökväg till filen
-file_path_image = base_path / "ishindret.png"
+file_path_image = base_path / "Ishindret.png"
 
 # Formattering
 MarginLeft = 20
