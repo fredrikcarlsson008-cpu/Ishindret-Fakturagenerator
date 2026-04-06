@@ -1,0 +1,8 @@
+pandas
+datetime
+BytesIO
+reportlab
+json
+qrqode
+PIL
+os
