@@ -4,3 +4,4 @@ qrcode
 Pillow
 streamlit
 reportlab
+openpyxl
