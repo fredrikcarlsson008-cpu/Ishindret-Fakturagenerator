@@ -8,4 +8,4 @@ os
 streamlit
 reportlab.pdfgen                            
 reportlab.lib.pagesizes                              
-reportlab.lib import
+reportlab.lib
