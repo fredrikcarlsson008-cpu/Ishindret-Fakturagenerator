@@ -2,6 +2,5 @@ pandas
 datetime
 qrcode
 Pillow
-os
 streamlit
 reportlab
