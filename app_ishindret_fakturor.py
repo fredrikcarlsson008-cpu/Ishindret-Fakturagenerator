@@ -245,10 +245,10 @@ if len(extraherad_data) > 0:
 
                 # Generera QR-koden
                 qr = qrcode.make(epc_string)
-                qr.save(base_path + "faktura_" + f"{Fastighet}" + "_qr.png")
+                qr.save(base_path + "/faktura_" + f"{Fastighet}" + "_qr.png")
 
-                pdf.drawImage(base_path + "faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
-                os.remove(base_patch + "faktura_" + f"{Fastighet}" + "_qr.png")
+                pdf.drawImage(base_path + "/faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
+                os.remove(base_patch + "/faktura_" + f"{Fastighet}" + "_qr.png")
 
                 pdf.showPage()
 
