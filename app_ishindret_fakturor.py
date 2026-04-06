@@ -11,6 +11,7 @@ import json
 import qrcode
 from PIL import Image
 import os
+from pathlib import Path
 
 title = 'Samfälligheten Ishindret'
 subTitle = 'Faktura'
@@ -19,6 +20,12 @@ Postadress = "583 36 Linköping"
 documentTitle = "Faktura"
 
 extraherad_data = ""
+
+# Hittar mappen där detta skript (.py-filen) ligger
+base_path = Path(__file__).resolve().parent
+
+# Skapar en fullständig sökväg till filen
+file_path_image = base_path / "ishindret.png"
 
 # Formattering
 MarginLeft = 20
@@ -120,7 +127,7 @@ if len(extraherad_data) > 0:
                 pdf.drawString(40, 775, title)
                 pdf.drawString(360, 775, subTitle)
 
-                pdf.drawImage("/Users/Fredrik/Documents/Python/Ishindret/Ishindret.png", 40, 630, width=250, height=130)
+                pdf.drawImage(file_path_image, 40, 630, width=250, height=130)
 
 
                 # Generera Fakturainformation
@@ -238,10 +245,10 @@ if len(extraherad_data) > 0:
 
                 # Generera QR-koden
                 qr = qrcode.make(epc_string)
-                qr.save("/Users/Fredrik/Documents/Python/Ishindret/faktura_" + f"{Fastighet}" + "_qr.png")
+                qr.save(base_path + "faktura_" + f"{Fastighet}" + "_qr.png")
 
-                pdf.drawImage("/Users/Fredrik/Documents/Python/Ishindret/faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
-                os.remove("/Users/Fredrik/Documents/Python/Ishindret/faktura_" + f"{Fastighet}" + "_qr.png")
+                pdf.drawImage(base_path + "faktura_" f"{Fastighet}" "_qr.png", Indent6 - 7, 120, width=140, height=140)
+                os.remove(base_patch + "faktura_" + f"{Fastighet}" + "_qr.png")
 
                 pdf.showPage()
 
