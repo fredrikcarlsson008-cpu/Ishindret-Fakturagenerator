@@ -1,9 +1,11 @@
 pandas
 datetime
 io
-reportlab
 json
 qrqode
 PIL
 os
 streamlit
+reportlab.pdfgen                            
+reportlab.lib.pagesizes                              
+reportlab.lib import
