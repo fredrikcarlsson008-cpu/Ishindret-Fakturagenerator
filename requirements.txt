@@ -1,6 +1,6 @@
 pandas
 datetime
-BytesIO
+io
 reportlab
 json
 qrqode
